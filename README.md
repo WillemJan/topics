@@ -1,3 +1,8 @@
+This is a fork of https://github.com/KBNLresearch/topics/,
+
+with an added category, music.
+
+
 # Topics
 
 Number of multi-class classifiers for news articles (topic) and DBpedia descriptions (topic and type). For further info and training source code see Jupyter notebooks for [topic](https://github.com/KBNLresearch/topics/blob/master/topics.ipynb) and [type](https://github.com/KBNLresearch/topics/blob/master/type.ipynb).
