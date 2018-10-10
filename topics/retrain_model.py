@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from yellowbrick.classifier import ClassPredictionError
 
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -13,6 +14,19 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
+
+
+
+'''
+from yellowbrick.classifier import visualizer = ClassPredictionError
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+visualizer = ClassificationReport(model)
+
+visualizer.fit(X_train, y_train)
+visualizer.score(X_test, y_test)
+visualizer.poof()
+'''
 
 df_orig = pd.read_csv('news_topics_music.csv')
 df_orig.head()
@@ -59,6 +73,13 @@ len(count_vect.vocabulary_.keys())
 joblib.dump(count_vect, 'news_topics_nl_vct.pkl')
 clf = OneVsRestClassifier(SVC(probability=True, kernel='linear', class_weight='balanced', C=1.0, verbose=True))
 clf.fit(X_train_counts, y_train)
+
+from yellowbrick.classifier import ClassificationReport
+
+
+visualizer = ClassificationReport(clf, classes=topics)
+visualizer.poof()
+
 
 joblib.dump(clf, 'news_topics_nl_clf.pkl')
 pred = clf.predict(X_test_counts)
