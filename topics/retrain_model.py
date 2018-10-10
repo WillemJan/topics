@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import matplotlib.pyplot as plt
+
 import pandas as pd
-from yellowbrick.classifier import ClassPredictionError
 
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -15,24 +15,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 
+from yellowbrick.classifier import ClassificationReport
 
-
-'''
-from yellowbrick.classifier import visualizer = ClassPredictionError
-from sklearn.linear_model import LogisticRegression
-model = LogisticRegression()
-visualizer = ClassificationReport(model)
-
-visualizer.fit(X_train, y_train)
-visualizer.score(X_test, y_test)
-visualizer.poof()
-'''
 
 df_orig = pd.read_csv('news_topics_music.csv')
 df_orig.head()
-
-#df_sru = pd.read_csv('news_topics_sru.csv')
-#df_sru.head()
 
 df = pd.concat([df_orig])
 df.shape
@@ -42,6 +29,7 @@ df.head()
 topics = ['music', 'politics', 'business', 'culture', 'science',
           'sports', 'crime', 'disasters', 'environment', 'health',
           'education', 'religion', 'lifestyle', 'other']
+
 
 df['sum_0'] = (df[topics] == 0).sum(axis=1)
 df['sum_1'] = (df[topics] == 1).sum(axis=1)
@@ -60,26 +48,44 @@ df[topics].as_matrix()
 df[topics] = df[topics].replace(to_replace=2, value=1)
 df[topics].as_matrix()
 
-topics = ['music', 'politics', 'business', 'culture', 'science', 'sports']
-X_train, X_test, y_train, y_test = train_test_split(df['ocr'], df[topics].as_matrix(), random_state=0)
+topics = ['business',
+          'culture',
+          'music',
+          'politics',
+          'science',
+          'sports']
+
+X_train, X_test, y_train, y_test = train_test_split(df['ocr'],
+                                                    df[topics].as_matrix(),
+                                                    random_state=0)
+
 X_train.shape, y_train.shape
 X_test.shape, y_test.shape
 
-count_vect = TfidfVectorizer(min_df=6, max_df=0.9, ngram_range=(2,5), analyzer='char_wb', max_features=10000)
+count_vect = TfidfVectorizer(min_df=6,
+                             max_df=0.9,
+                             ngram_range=(2,5),
+                             analyzer='char_wb',
+                             max_features=10000)
+
 X_train_counts = count_vect.fit_transform(X_train)
 X_test_counts = count_vect.transform(X_test)
 
 len(count_vect.vocabulary_.keys())
 joblib.dump(count_vect, 'news_topics_nl_vct.pkl')
-clf = OneVsRestClassifier(SVC(probability=True, kernel='linear', class_weight='balanced', C=1.0, verbose=True))
+
+clf = OneVsRestClassifier(SVC(probability=True,
+                              kernel='linear',
+                              class_weight='balanced',
+                              C=1.0,
+                              verbose=True))
+
 clf.fit(X_train_counts, y_train)
 
-from yellowbrick.classifier import ClassificationReport
-
-
 visualizer = ClassificationReport(clf, classes=topics)
-visualizer.poof()
-
+visualizer.fit(X_train_counts, y_train)
+visualizer.score(X_test_counts, y_test)
+visualizer.poof(outpath="news_topics.png")
 
 joblib.dump(clf, 'news_topics_nl_clf.pkl')
 pred = clf.predict(X_test_counts)
@@ -94,6 +100,7 @@ scores['precision'] = precision_score(y_test, pred, average=None)
 scores['recall'] = recall_score(y_test, pred, average=None)
 scores['f1'] = f1_score(y_test, pred, average=None)
 pd.DataFrame(data=scores, index=topics)
+
 article = '''Minister Romme en partijgenoot Lieftinck van het CDA verlieten gisteren het Binnenhof
         om met de priester in de kerk te gaan praten over de zin en onzin van religieuze geboortebeperking.
         Computer op komst.'''
