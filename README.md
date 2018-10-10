@@ -2,6 +2,8 @@ This is a fork of https://github.com/KBNLresearch/topics/,
 
 with an added category, music.
 
+![Model test output](https://raw.githubusercontent.com/WillemJan/topics/master/topics/news_topics.png)
+
 
 # Topics
 
